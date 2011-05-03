@@ -8,6 +8,8 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,6 +25,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -135,12 +139,15 @@ public class EntryActivity extends Activity implements OnClickListener {
 			TextView content = null;
 			TextView updateTime = null;
 			TextView level = null;
+			LinearLayout levelLayout = null;
+			
 
 			if (roomEntry != null) {
 				name = (TextView) view.findViewById(R.id.textView1);
 				updateTime = (TextView) view.findViewById(R.id.textView2);
 				content = (TextView) view.findViewById(R.id.textView3);
 				level = (TextView) view.findViewById(R.id.textView5);
+				levelLayout = (LinearLayout) view.findViewById(R.id.levelLayout);
 			}
 			if (name != null) {
 				name.setText(roomEntry.getParticipationName());
@@ -154,9 +161,17 @@ public class EntryActivity extends Activity implements OnClickListener {
 			}
 			if (level != null) {
 				String commentLevel = "";
-				for (int i = 0; i < roomEntry.getLevel(); i++)
+				Bitmap barImage = BitmapFactory.decodeResource(getResources(),R.drawable.level_bar);
+				levelLayout.removeAllViews();
+				
+				for (int i = 0; i < roomEntry.getLevel(); i++){
+					ImageView imageView = new ImageView(this.getContext());
+					imageView.setImageBitmap(barImage);
+					imageView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT));
+					levelLayout.addView(imageView);
 					commentLevel += "> ";
-				level.setText(commentLevel);
+					//level.setText(commentLevel);
+				}
 			}
 
 			UserSession session = UserSession.getInstance();
