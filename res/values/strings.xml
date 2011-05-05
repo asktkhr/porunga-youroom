@@ -5,8 +5,6 @@
     <string name="delete_token">ログアウト</string>
     <string name="login_button">ログイン</string>
     <string name="reacquire_group">更新</string>
-    <string name="check_update">更新を確認する</string>
-    <string name="uncheck_update">更新確認をやめる</string>
     <string name="post_button">投稿する</string>
     <string name="post_ok">投稿しました</string>
     <string name="post_ng">投稿に失敗しました</string>
@@ -15,6 +13,9 @@
     <string name="network_error">おや？回線の調子が悪いようです。後ほどやりなおしてください。</string>
     <string name="reacquire_room">更新</string>
     <string name="app_description">polluxは、グループ内情報共有ツール\n\n\"youRoom(ユールーム)\"のクライアントアプリです。\n\n各ルームの新着情報のチェックや新規投稿などを行うことが可能です。</string>
+    <string name="setting">設定</string>
+    <string name="updateTimePreferenceTitle">定期新着確認</string>
+    <string name="notificationPreferenceTitle">新着通知</string>
     <string name="now_loading">読み込み中</string>
     <string name="display_attachment">添付：</string>
     <string name="attachment_type_text">ロングテキスト</string>

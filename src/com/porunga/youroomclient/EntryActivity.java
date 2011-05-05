@@ -9,7 +9,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,7 +23,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -102,7 +103,7 @@ public class EntryActivity extends Activity implements OnClickListener {
 				ListView listView = (ListView) parent;
 				YouRoomEntry item = (YouRoomEntry) listView.getItemAtPosition(position);
 				if (item != null) {
-					contentsDialogUtil.showContentsDialog(item,roomId);
+					contentsDialogUtil.showContentsDialog(item, roomId);
 					return true;
 				} else
 					return false;
@@ -137,16 +138,16 @@ public class EntryActivity extends Activity implements OnClickListener {
 			TextView name = null;
 			TextView content = null;
 			TextView updateTime = null;
-			TextView level = null;
-			LinearLayout levelLayout = null;
+			ImageView level = null;
+			// TextView level = null;
 			TextView attachmentType = null;
 
 			if (roomEntry != null) {
 				name = (TextView) view.findViewById(R.id.name);
 				updateTime = (TextView) view.findViewById(R.id.update_time);
 				content = (TextView) view.findViewById(R.id.content);
-				level = (TextView) view.findViewById(R.id.level);
-				levelLayout = (LinearLayout) view.findViewById(R.id.levelLayout);
+				level = (ImageView) view.findViewById(R.id.level);
+				// level = (TextView) view.findViewById(R.id.level);
 				attachmentType = (TextView) view.findViewById(R.id.attachment_type);
 			}
 			if (name != null) {
@@ -160,18 +161,33 @@ public class EntryActivity extends Activity implements OnClickListener {
 				content.setText(roomEntry.getContent());
 			}
 			if (level != null) {
-				String commentLevel = "";
-				Bitmap barImage = BitmapFactory.decodeResource(getResources(),R.drawable.level_bar);
-				levelLayout.removeAllViews();
-				
-				for (int i = 0; i < roomEntry.getLevel(); i++){
-					ImageView imageView = new ImageView(this.getContext());
-					imageView.setImageBitmap(barImage);
-					imageView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT));
-					levelLayout.addView(imageView);
-					commentLevel += "> ";
-					//level.setText(commentLevel);
+				switch (roomEntry.getLevel()) {
+				case 1:
+					level.setImageResource(R.drawable.level_image1);
+					break;
+				case 2:
+					level.setImageResource(R.drawable.level_image2);
+					break;
+				case 3:
+					level.setImageResource(R.drawable.level_image3);
+					break;
+				case 4:
+					level.setImageResource(R.drawable.level_image4);
+					break;
+				case 5:
+					level.setImageResource(R.drawable.level_image5);
+					break;
+				case 6:
+					level.setImageResource(R.drawable.level_image6);
+					break;
+
 				}
+				// String commentLevel = "";
+				//
+				// for (int i = 0; i < roomEntry.getLevel(); i++){
+				// commentLevel += "> ";
+				// level.setText(commentLevel);
+				// }
 			}
 			String type = roomEntry.getAttachmentType();
 

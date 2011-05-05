@@ -3,14 +3,14 @@
 	android:orientation="horizontal" android:layout_height="wrap_content">
 	<LinearLayout android:id="@+id/linearLayout2"
 		android:layout_height="wrap_content" android:layout_width="fill_parent">
-		<TextView android:id="@+id/level" android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:textStyle="bold"
-			android:textSize="7pt"></TextView>
+		<!-- <TextView android:id="@+id/level" android:layout_width="wrap_content" 
+			android:layout_height="wrap_content" android:textStyle="bold" android:textSize="7pt"></TextView> -->
+		<ImageView android:layout_height="wrap_content" android:id="@+id/level"
+			android:layout_width="wrap_content" android:minHeight="16px"
+			android:layout_gravity="left"></ImageView>
 		<LinearLayout android:layout_width="fill_parent"
 			android:layout_height="wrap_content" android:id="@+id/linearLayout3"
 			android:orientation="vertical" android:layout_margin="1pt">
-			<LinearLayout android:id="@+id/levelLayout"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"></LinearLayout>
 			<LinearLayout android:layout_width="fill_parent"
 				android:layout_height="wrap_content" android:id="@+id/linearLayout4">
 				<TextView android:id="@+id/name" android:layout_height="wrap_content"
