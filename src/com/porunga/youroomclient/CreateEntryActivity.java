@@ -8,8 +8,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,10 +25,13 @@ public class CreateEntryActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.create_entry);
 
-		Button postButton = (Button) findViewById(R.id.post_button);
-		postButton.setText(getString(R.string.post_button));
+		ImageButton postButton = (ImageButton) findViewById(R.id.post_button);
+//		postButton.setText(getString(R.string.post_button));
 
 		postButton.setOnClickListener(this);
+		
+		TextView postText = (TextView)findViewById(R.id.post_text);
+		postText.setOnClickListener(this);
 		entryContentText = (EditText) findViewById(R.id.entry_content);
 		entryContentText.addTextChangedListener(new UITextWatcher());
 

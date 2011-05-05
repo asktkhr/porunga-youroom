@@ -7,11 +7,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,7 +17,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -61,8 +57,8 @@ public class EntryActivity extends Activity implements OnClickListener {
 		YouRoomCommandProxy proxy = new YouRoomCommandProxy(this);
 		YouRoomEntry youRoomEntry = proxy.getEntry(roomId, rootId);
 
-		Button postButton = (Button) findViewById(R.id.post_button);
-		postButton.setText(getString(R.string.post_button));
+		ImageButton postButton = (ImageButton) findViewById(R.id.post_button);
+//		postButton.setText(getString(R.string.post_button));
 		postButton.setOnClickListener(this);
 		parentEntryCount = youRoomEntry.getDescendantsCount();
 
@@ -160,6 +156,7 @@ public class EntryActivity extends Activity implements OnClickListener {
 			if (content != null) {
 				content.setText(roomEntry.getContent());
 			}
+
 			if (level != null) {
 				switch (roomEntry.getLevel()) {
 				case 1:
@@ -180,7 +177,8 @@ public class EntryActivity extends Activity implements OnClickListener {
 				case 6:
 					level.setImageResource(R.drawable.level_image6);
 					break;
-
+				default:
+					level.setImageResource(R.drawable.level_image_default);
 				}
 				// String commentLevel = "";
 				//

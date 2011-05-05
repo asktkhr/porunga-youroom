@@ -8,7 +8,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,7 +20,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,9 +53,12 @@ public class RoomActivity extends Activity implements OnClickListener {
 		// this.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		setContentView(R.layout.room_list);
 
-		Button postButton = (Button) findViewById(R.id.post_button);
-		postButton.setText(getString(R.string.post_button));
+		ImageButton postButton = (ImageButton) findViewById(R.id.post_button);
+		// postButton.setText(getString(R.string.post_button));
 		postButton.setOnClickListener(this);
+		
+		ImageButton updateButton = (ImageButton) findViewById(R.id.update_button);
+		updateButton.setOnClickListener(this);
 
 		Intent intent = getIntent();
 		roomId = intent.getStringExtra("roomId");
@@ -154,10 +156,12 @@ public class RoomActivity extends Activity implements OnClickListener {
 				YouRoomEntry item = (YouRoomEntry) listView.getItemAtPosition(position);
 				if (item == null)
 					return false;
-//				String entryId = String.valueOf(item.getId());
-//				SQLiteDatabase cacheDb = ((AppHolder) getApplication()).getCacheDb();
-//				cacheDb.execSQL("delete from entries where entryId = ? and roomId = ? ;", new String[] { entryId, roomId });
-				contentsDialogUtil.showContentsDialog(item,roomId);
+				// String entryId = String.valueOf(item.getId());
+				// SQLiteDatabase cacheDb = ((AppHolder)
+				// getApplication()).getCacheDb();
+				// cacheDb.execSQL("delete from entries where entryId = ? and roomId = ? ;",
+				// new String[] { entryId, roomId });
+				contentsDialogUtil.showContentsDialog(item, roomId);
 				return true;
 			}
 		});
@@ -402,13 +406,32 @@ public class RoomActivity extends Activity implements OnClickListener {
 	}
 
 	@Override
-	public void onClick(View arg0) {
+	public void onClick(View view) {
 
 		// TODO Auto-generated method stub
+		switch (view.getId()) {
+		case R.id.post_button:
+			Intent intent = new Intent(getApplication(), CreateEntryActivity.class);
+			intent.putExtra("roomId", String.valueOf(roomId));
+			intent.putExtra("youRoomEntry", new YouRoomEntry());
+			startActivity(intent);
+			break;
 
-		Intent intent = new Intent(getApplication(), CreateEntryActivity.class);
-		intent.putExtra("roomId", String.valueOf(roomId));
-		intent.putExtra("youRoomEntry", new YouRoomEntry());
-		startActivity(intent);
+		case R.id.update_button:
+			progressDialog = new ProgressDialog(this);
+			setProgressDialog(progressDialog);
+			progressDialog.show();
+			adapter.clear();
+			page = 1;
+			Map<String, String> parameterMap = new HashMap<String, String>();
+			parameterMap.put("page", String.valueOf(page));
+			footerView.setMinHeight(FOOTER_MIN_HEIGHT);
+			footerView.setVisibility(View.GONE);
+			((AppHolder) getApplication()).setDirty(roomId, true);
+			GetRoomEntryTask task = new GetRoomEntryTask(roomId, parameterMap, this);
+			task.execute();
+			page++;
+			break;
+		}
 	}
 }
