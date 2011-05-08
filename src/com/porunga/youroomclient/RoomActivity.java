@@ -57,7 +57,7 @@ public class RoomActivity extends Activity implements OnClickListener {
 		// postButton.setText(getString(R.string.post_button));
 		postButton.setOnClickListener(this);
 		
-		ImageButton updateButton = (ImageButton) findViewById(R.id.update_button);
+		ImageButton updateButton = (ImageButton) findViewById(R.id.reload_button);
 		updateButton.setOnClickListener(this);
 
 		Intent intent = getIntent();
@@ -417,7 +417,7 @@ public class RoomActivity extends Activity implements OnClickListener {
 			startActivity(intent);
 			break;
 
-		case R.id.update_button:
+		case R.id.reload_button:
 			progressDialog = new ProgressDialog(this);
 			setProgressDialog(progressDialog);
 			progressDialog.show();

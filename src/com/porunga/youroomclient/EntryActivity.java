@@ -133,14 +133,14 @@ public class EntryActivity extends Activity implements OnClickListener {
 			YouRoomEntry roomEntry = (YouRoomEntry) this.getItem(position);
 			TextView name = null;
 			TextView content = null;
-			TextView updateTime = null;
+			TextView createdTime = null;
 			ImageView level = null;
 			// TextView level = null;
 			TextView attachmentType = null;
 
 			if (roomEntry != null) {
 				name = (TextView) view.findViewById(R.id.name);
-				updateTime = (TextView) view.findViewById(R.id.update_time);
+				createdTime = (TextView) view.findViewById(R.id.update_time);
 				content = (TextView) view.findViewById(R.id.content);
 				level = (ImageView) view.findViewById(R.id.level);
 				// level = (TextView) view.findViewById(R.id.level);
@@ -149,9 +149,9 @@ public class EntryActivity extends Activity implements OnClickListener {
 			if (name != null) {
 				name.setText(roomEntry.getParticipationName());
 			}
-			if (updateTime != null) {
-				updateTime.setTextColor(Color.LTGRAY);
-				updateTime.setText(YouRoomUtil.convertDatetime(roomEntry.getUpdatedTime()));
+			if (createdTime != null) {
+				createdTime.setTextColor(Color.LTGRAY);
+				createdTime.setText(YouRoomUtil.convertDatetime(roomEntry.getCreatedTime()));
 			}
 			if (content != null) {
 				content.setText(roomEntry.getContent());
@@ -178,7 +178,7 @@ public class EntryActivity extends Activity implements OnClickListener {
 					level.setImageResource(R.drawable.level_image6);
 					break;
 				default:
-					level.setImageResource(R.drawable.level_image_default);
+					level.setImageResource(R.drawable.transecate_background);
 				}
 				// String commentLevel = "";
 				//
@@ -213,7 +213,7 @@ public class EntryActivity extends Activity implements OnClickListener {
 			if (roomAccessTime != null) {
 				int compareResult = YouRoomUtil.calendarCompareTo(roomAccessTime, roomEntry.getUpdatedTime());
 				if (compareResult < 0) {
-					updateTime.setTextColor(Color.RED);
+					createdTime.setTextColor(Color.RED);
 				}
 			}
 

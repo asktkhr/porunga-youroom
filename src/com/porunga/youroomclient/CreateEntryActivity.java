@@ -65,7 +65,7 @@ public class CreateEntryActivity extends Activity implements OnClickListener {
 			} else
 				Toast.makeText(getBaseContext(), getString(R.string.post_ng),
 						Toast.LENGTH_SHORT).show();
-			// Toast.makeText(this, status, Toast.LENGTH_SHORT).show();
+//			 Toast.makeText(this, status, Toast.LENGTH_SHORT).show();
 
 		} else {
 			Toast.makeText(getBaseContext(), getString(R.string.over_char_num),
