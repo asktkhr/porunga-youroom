@@ -183,11 +183,11 @@ public class YouRoomUtil extends ContextWrapper {
 
 		SimpleDateFormat format = new SimpleDateFormat("HH:mm");
 
-		if ((milliseconds/1000+70) < 60) {
-			return String.valueOf((milliseconds/1000+70) + "秒前");
-		}
+//		if ((milliseconds/1000) < 60) {
+//			return String.valueOf((milliseconds/1000) + "秒前");
+//		}else 
 		if (milliseconds / (1000 * 60) < 60) {
-			return String.valueOf(milliseconds / (1000 * 60)+1 + "分前");
+			return String.valueOf(milliseconds / (1000 * 60) + "分前");
 		} else if (milliseconds / (1000 * 60 * 60) < 24) {
 			return String.valueOf(milliseconds / (1000 * 60 * 60) + "時間前");
 		} else if (displayCal.get(Calendar.YEAR) > 1970) {
