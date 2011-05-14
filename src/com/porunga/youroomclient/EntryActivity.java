@@ -7,6 +7,8 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,6 +24,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.porunga.youroomclient.RoomActivity.YouRoomEntryAdapter.DownloadImageTask;
 
 public class EntryActivity extends Activity implements OnClickListener {
 	String roomId;
@@ -58,7 +62,7 @@ public class EntryActivity extends Activity implements OnClickListener {
 		YouRoomEntry youRoomEntry = proxy.getEntry(roomId, rootId);
 
 		ImageButton postButton = (ImageButton) findViewById(R.id.post_button);
-//		postButton.setText(getString(R.string.post_button));
+		// postButton.setText(getString(R.string.post_button));
 		postButton.setOnClickListener(this);
 		parentEntryCount = youRoomEntry.getDescendantsCount();
 
@@ -119,10 +123,12 @@ public class EntryActivity extends Activity implements OnClickListener {
 	// ListViewカスタマイズ用のArrayAdapter
 	public class YouRoomChildEntryAdapter extends ArrayAdapter<YouRoomEntry> {
 		private LayoutInflater inflater;
+		private Activity activity;
 
-		public YouRoomChildEntryAdapter(Context context, int textViewResourceId, ArrayList<YouRoomEntry> items) {
-			super(context, textViewResourceId, items);
-			this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		public YouRoomChildEntryAdapter(Activity activity, int textViewResourceId, ArrayList<YouRoomEntry> items) {
+			super(activity, textViewResourceId, items);
+			this.inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			this.activity = activity;
 		}
 
 		public View getView(final int position, View convertView, ViewGroup parent) {
@@ -136,6 +142,7 @@ public class EntryActivity extends Activity implements OnClickListener {
 			TextView createdTime = null;
 			ImageView level = null;
 			// TextView level = null;
+			ImageView memberImageView = null;
 			TextView attachmentType = null;
 
 			if (roomEntry != null) {
@@ -144,6 +151,7 @@ public class EntryActivity extends Activity implements OnClickListener {
 				content = (TextView) view.findViewById(R.id.content);
 				level = (ImageView) view.findViewById(R.id.level);
 				// level = (TextView) view.findViewById(R.id.level);
+				memberImageView = (ImageView) view.findViewById(R.id.member_image);
 				attachmentType = (TextView) view.findViewById(R.id.attachment_type);
 			}
 			if (name != null) {
@@ -187,6 +195,15 @@ public class EntryActivity extends Activity implements OnClickListener {
 				// level.setText(commentLevel);
 				// }
 			}
+
+			if (memberImageView != null) {
+				memberImageView.setImageResource(R.drawable.default_member_image);
+				String participationId = roomEntry.getParticipationId();
+				memberImageView.setTag(participationId);
+				DownloadImageTask downloadImageTask = new DownloadImageTask(memberImageView, activity);
+				downloadImageTask.execute(roomId, participationId);
+			}
+
 			String type = roomEntry.getAttachmentType();
 
 			if (attachmentType != null) {
@@ -218,6 +235,45 @@ public class EntryActivity extends Activity implements OnClickListener {
 			}
 
 			return view;
+		}
+		
+		public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+			private ImageView memberImage;
+			private Activity activity;
+			private boolean[] errFlg = { false };
+			private String tag;
+
+			public DownloadImageTask(ImageView memberImage, Activity activity) {
+				this.memberImage = memberImage;
+				this.activity = activity;
+				this.tag = memberImage.getTag().toString();
+			}
+
+			@Override
+			protected Bitmap doInBackground(String... params) {
+
+				YouRoomCommandProxy proxy = new YouRoomCommandProxy(activity);
+				Bitmap image;
+				synchronized (activity.getBaseContext()) {
+					try {
+						image = proxy.getMemberImage(params[0], params[1], errFlg);
+					} catch (Exception e) {
+						errFlg[0] = true;
+						image = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
+					}
+					return image;
+				}
+			}
+
+			@Override
+			protected void onPostExecute(Bitmap image) {
+				if (errFlg[0]) {
+					Toast.makeText(getBaseContext(), getString(R.string.network_error), Toast.LENGTH_SHORT).show();
+				}
+				if (tag.equals(memberImage.getTag().toString()))
+					this.memberImage.setImageBitmap(image);
+				this.memberImage.setVisibility(View.VISIBLE);
+			}
 		}
 	}
 

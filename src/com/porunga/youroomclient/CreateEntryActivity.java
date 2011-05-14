@@ -1,9 +1,12 @@
 package com.porunga.youroomclient;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -16,9 +19,12 @@ import android.widget.Toast;
 public class CreateEntryActivity extends Activity implements OnClickListener {
 	private static final String POST_OK = "201";
 	private static final int MAX_CHAR_NUM = 140;
+	private static final int POSTING = 0;
+	private static final int POST_END = 1;
 	protected boolean postable = true;
-	EditText entryContentText;
-
+	private EditText entryContentText;
+	protected ProgressDialog dialog;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -41,6 +47,7 @@ public class CreateEntryActivity extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
+
 		Intent intent = getIntent();
 		String roomId = intent.getStringExtra("roomId");
 		YouRoomEntry item = (YouRoomEntry) intent
@@ -71,7 +78,6 @@ public class CreateEntryActivity extends Activity implements OnClickListener {
 			Toast.makeText(getBaseContext(), getString(R.string.over_char_num),
 					Toast.LENGTH_SHORT).show();
 		}
-
 	}
 
 	private class UITextWatcher implements TextWatcher {
@@ -96,4 +102,5 @@ public class CreateEntryActivity extends Activity implements OnClickListener {
 				int count) {
 		}
 	}
+
 }
