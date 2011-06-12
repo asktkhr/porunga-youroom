@@ -19,6 +19,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -52,8 +53,9 @@ public class EntryActivity extends Activity implements OnClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.entry_list);
-		contentsDialogUtil = new ContentsDialogUtil(this, new YouRoomCommandProxy(this),handler);
+		contentsDialogUtil = new ContentsDialogUtil(this, new YouRoomCommandProxy(this), handler);
 	}
 
 	@Override
@@ -75,18 +77,18 @@ public class EntryActivity extends Activity implements OnClickListener {
 		ImageButton postButton = (ImageButton) findViewById(R.id.post_button);
 		// postButton.setText(getString(R.string.post_button));
 		postButton.setOnClickListener(this);
-		parentEntryCount = youRoomEntry.getDescendantsCount();
+		// parentEntryCount = youRoomEntry.getDescendantsCount();
 
 		// TODO if String decodeResult = "";
 		ListView listView = (ListView) findViewById(R.id.listView1);
 
-		// progressDialog = new ProgressDialog(this);
-		// setProgressDialog(progressDialog);
-		// progressDialog.show();
-
-		int level = -1;
-		youRoomEntry.setLevel(level);
 		ArrayList<YouRoomEntry> dataList = new ArrayList<YouRoomEntry>();
+		if (youRoomEntry != null) {
+			int level = -1;
+			youRoomEntry.setLevel(level);
+			addChildEntries(dataList,youRoomEntry,level);
+			
+		}
 		adapter = new YouRoomChildEntryAdapter(this, R.layout.entry_list_item, dataList);
 		listView.setAdapter(adapter);
 
@@ -124,7 +126,7 @@ public class EntryActivity extends Activity implements OnClickListener {
 
 		GetChildEntryTask task = new GetChildEntryTask();
 		try {
-			task.execute(youRoomEntry);
+			task.execute(pseudYouRoomEntry);
 		} catch (RejectedExecutionException e) {
 			// TODO
 			// AsyncTaskでは内部的にキューを持っていますが、このキューサイズを超えるタスクをexecuteすると、ブロックされずに例外が発生します。らしいので、一旦握りつぶしている
@@ -303,6 +305,7 @@ public class EntryActivity extends Activity implements OnClickListener {
 		// private String roomId;
 		private YouRoomEntry roomChildEntry;
 		private Object objLock = new Object();
+		private boolean[] errFlg = { false };
 
 		public GetChildEntryTask(String roomId) {
 			// this.roomId = roomId;
@@ -312,12 +315,17 @@ public class EntryActivity extends Activity implements OnClickListener {
 
 		}
 
+		protected void onPreExecute() {
+			setProgressBarIndeterminateVisibility(true);
+		}
+
 		@Override
 		protected ArrayList<YouRoomEntry> doInBackground(YouRoomEntry... roomChildEntries) {
 			ArrayList<YouRoomEntry> dataList = new ArrayList<YouRoomEntry>();
-			roomChildEntries[0].setLevel(0);
-			dataList.add(roomChildEntries[0]);
-			for (YouRoomEntry child : roomChildEntries[0].getChildren()) {
+			YouRoomEntry item = proxy.getEntry(roomId, String.valueOf(roomChildEntries[0].getId()), roomChildEntries[0].getUpdatedTime(), errFlg);
+			item.setLevel(0);
+			dataList.add(item);
+			for (YouRoomEntry child : item.getChildren()) {
 				addChildEntries(dataList, child, 1);
 			}
 
@@ -331,17 +339,21 @@ public class EntryActivity extends Activity implements OnClickListener {
 
 		@Override
 		protected void onPostExecute(ArrayList<YouRoomEntry> dataChildList) {
-			synchronized (objLock) {
-				if (dataChildList.size() > 0) {
-					for (int i = 0; i < dataChildList.size(); i++) {
-						adapter.insert(dataChildList.get(i), adapter.getPosition(roomChildEntry) + i + 1);
-					}
+			adapter.clear();
+
+			 synchronized (objLock) {
+			if (dataChildList.size() > 0) {
+				for (int i = 0; i < dataChildList.size(); i++) {
+					adapter.insert(dataChildList.get(i), adapter.getPosition(roomChildEntry) + i + 1);
 				}
+				 }
 				requestCount++;
 				// publishProgress(requestCount);
 				Log.e("count", "requestCount = " + requestCount);
 			}
 			adapter.notifyDataSetChanged();
+			setProgressBarIndeterminateVisibility(false);
+
 			// // 親が一回呼ばれるので+1
 			// if (parentEntryCount <= requestCount + 1)
 			// progressDialog.dismiss();
@@ -370,7 +382,7 @@ public class EntryActivity extends Activity implements OnClickListener {
 
 	}
 
-	private void destroyEntry(String[] params){
+	private void destroyEntry(String[] params) {
 		DestroyEntryTask task = new DestroyEntryTask(this);
 		task.execute(params);
 	}
@@ -443,7 +455,7 @@ public class EntryActivity extends Activity implements OnClickListener {
 			case DELETE: {
 				String[] params = (String[]) msg.obj;
 				destroyEntry(params);
-				
+
 				break;
 			}
 			}

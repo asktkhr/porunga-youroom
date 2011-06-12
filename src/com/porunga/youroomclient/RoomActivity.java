@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -60,6 +61,7 @@ public class RoomActivity extends Activity implements OnClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 
 		// this.getWindow().setSoftInputMode(LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 		setContentView(R.layout.room_list);
@@ -71,21 +73,17 @@ public class RoomActivity extends Activity implements OnClickListener {
 		ImageButton reloadButton = (ImageButton) findViewById(R.id.reload_button);
 		reloadButton.setOnClickListener(this);
 
-		Intent intent = getIntent();
-		roomId = intent.getStringExtra("roomId");
-		listView = (ListView) findViewById(R.id.listView1);
 
+		listView = (ListView) findViewById(R.id.listView1);
 		footerView = new TextView(this);
 		footerView.setText("もっと読む");
 		footerView.setGravity(Gravity.CENTER);
 		footerView.setTextColor(Color.LTGRAY);
+		footerView.setMinHeight(FOOTER_MIN_HEIGHT);
+		footerView.setVisibility(View.GONE);
 		listView.addFooterView(footerView);
 
-		ArrayList<YouRoomEntry> dataList = new ArrayList<YouRoomEntry>();
-		adapter = new YouRoomEntryAdapter(this, R.layout.room_list_item, dataList);
-		listView.setAdapter(adapter);
-		
-		contentsDialogUtil = new ContentsDialogUtil(this, new YouRoomCommandProxy(this),handler);
+		contentsDialogUtil = new ContentsDialogUtil(this, new YouRoomCommandProxy(this), handler);
 	}
 
 	@Override
@@ -104,11 +102,22 @@ public class RoomActivity extends Activity implements OnClickListener {
 	public void onStart() {
 		super.onStart();
 		final Activity activity = this;
+		Intent intent = getIntent();
+		roomId = intent.getStringExtra("roomId");
 
+
+		// ArrayList<YouRoomEntry> dataList = new ArrayList<YouRoomEntry>();
 		Map<String, String> parameterMap = new HashMap<String, String>();
 		parameterMap.put("page", String.valueOf(page));
-		footerView.setMinHeight(FOOTER_MIN_HEIGHT);
-		footerView.setVisibility(View.GONE);
+		YouRoomCommandProxy proxy = new YouRoomCommandProxy(this);
+		ArrayList<YouRoomEntry> dataList = proxy.getRoomEntryList(roomId, parameterMap);
+		adapter = new YouRoomEntryAdapter(this, R.layout.room_list_item, dataList);
+		listView.setAdapter(adapter);
+
+		// Map<String, String> parameterMap = new HashMap<String, String>();
+		// parameterMap.put("page", String.valueOf(page));
+		// footerView.setMinHeight(FOOTER_MIN_HEIGHT);
+		// footerView.setVisibility(View.GONE);
 		GetRoomEntryTask task = new GetRoomEntryTask(roomId, parameterMap, activity);
 		task.execute();
 		page++;
@@ -282,8 +291,9 @@ public class RoomActivity extends Activity implements OnClickListener {
 			int count = roomEntry.getDescendantsCount();
 			if (count == -1) {
 				descendantsCount.setText("");
-				GetEntryTask task = new GetEntryTask(descendantsCount, roomId, activity);
-				task.execute(roomEntry);
+				// GetEntryTask task = new GetEntryTask(descendantsCount,
+				// roomId, activity);
+				// task.execute(roomEntry);
 			} else {
 				// TODO レイアウト修正直書き
 				descendantsCount.setText("[ " + count + "comments ] > ");
@@ -426,9 +436,7 @@ public class RoomActivity extends Activity implements OnClickListener {
 		}
 
 		protected void onPreExecute() {
-			progressDialog = new ProgressDialog(activity);
-			setProgressDialog(progressDialog);
-			progressDialog.show();
+			setProgressBarIndeterminateVisibility(true);
 		}
 
 		@Override
@@ -443,7 +451,10 @@ public class RoomActivity extends Activity implements OnClickListener {
 			if (errFlg[0]) {
 				Toast.makeText(getBaseContext(), getString(R.string.network_error), Toast.LENGTH_SHORT).show();
 			}
-			int count = adapter.getCount();
+			// int count = adapter.getCount();
+			if (page == 2)
+				adapter.clear();
+
 			// Iterator iterator = dataList.iterator();
 			// while (iterator.hasNext()) {
 			// adapter.add((YouRoomEntry) iterator.next());
@@ -452,13 +463,15 @@ public class RoomActivity extends Activity implements OnClickListener {
 				adapter.add(youRoomEntry);
 			}
 			adapter.notifyDataSetChanged();
-			listView.setSelection(count);
+			// listView.setSelection(count);
 			if (dataList.size() < MAX_ROOM_COUNT) {
 				footerView.setMinHeight(0);
 			} else {
 				footerView.setVisibility(View.VISIBLE);
 			}
-			progressDialog.dismiss();
+			((AppHolder) getApplication()).setDirty(roomId, false);
+			setProgressBarIndeterminateVisibility(false);
+			// progressDialog.dismiss();
 		}
 	}
 
@@ -488,7 +501,6 @@ public class RoomActivity extends Activity implements OnClickListener {
 	}
 
 	private void reloadList() {
-		adapter.clear();
 		page = 1;
 		Map<String, String> parameterMap = new HashMap<String, String>();
 		parameterMap.put("page", String.valueOf(page));
@@ -499,8 +511,8 @@ public class RoomActivity extends Activity implements OnClickListener {
 		task.execute();
 		page++;
 	}
-	
-	private void destroyEntry(String[] params){
+
+	private void destroyEntry(String[] params) {
 		DestroyEntryTask task = new DestroyEntryTask(this);
 		task.execute(params);
 	}
@@ -562,7 +574,7 @@ public class RoomActivity extends Activity implements OnClickListener {
 			case DELETE: {
 				String[] params = (String[]) msg.obj;
 				destroyEntry(params);
-				
+
 				break;
 			}
 			}

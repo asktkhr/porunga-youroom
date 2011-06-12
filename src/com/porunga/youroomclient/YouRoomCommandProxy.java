@@ -245,6 +245,7 @@ public class YouRoomCommandProxy {
 
 	public ArrayList<YouRoomEntry> acquireHomeEntryList(Map<String, String> parameterMap, boolean[] errFlg) {
 		ArrayList<YouRoomEntry> dataList = new ArrayList<YouRoomEntry>();
+		ArrayList<String> roomList = new ArrayList<String>();
 		try {
 			String homeTimeline = youRoomCommand.acquireHomeTimeline(parameterMap);
 			JSONArray jsons = new JSONArray(homeTimeline);
@@ -255,6 +256,8 @@ public class YouRoomCommandProxy {
 
 				int id = entryObject.getInt("id");
 				String participationName = entryObject.getJSONObject("participation").getString("name");
+				roomList.add(entryObject.getJSONObject("participation").getJSONObject("group").getString("to_param"));
+
 				String content = entryObject.getString("content");
 
 				String createdTime = entryObject.getString("created_at");
@@ -278,6 +281,9 @@ public class YouRoomCommandProxy {
 		}
 
 		if (dataList.size() > 0) {
+			for (String roomId : roomList) {
+				appHolder.setDirty(roomId, true);
+			}
 			appHolder.clearDirty();
 		}
 
@@ -344,7 +350,7 @@ public class YouRoomCommandProxy {
 				JSONArray jsonArray = new JSONArray(youRoomCommand.getRoomTimeLine(roomId, parameterMap));
 				for (int i = 0; i < jsonArray.length(); i++) {
 					YouRoomEntry entry = buildEntryFromJson(jsonArray.getJSONObject(i).getJSONObject("entry"));
-					entry.setDescendantsCount(-1);
+					// entry.setDescendantsCount(-1);
 					entryList.add(entry);
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					(new ObjectOutputStream(baos)).writeObject(entry);
@@ -387,7 +393,7 @@ public class YouRoomCommandProxy {
 					JSONArray jsonArray = new JSONArray(youRoomCommand.getRoomTimeLine(roomId, parameterMap));
 					for (int i = 0; i < jsonArray.length(); i++) {
 						YouRoomEntry entry = buildEntryFromJson(jsonArray.getJSONObject(i).getJSONObject("entry"));
-						entry.setDescendantsCount(-1);
+//						entry.setDescendantsCount(-1);
 						entryList.add(entry);
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
 						(new ObjectOutputStream(baos)).writeObject(entry);
@@ -436,6 +442,38 @@ public class YouRoomCommandProxy {
 		return entryList;
 	}
 
+	public ArrayList<YouRoomEntry> getRoomEntryList(String roomId, Map<String, String> parameterMap) {
+		ArrayList<YouRoomEntry> entryList = new ArrayList<YouRoomEntry>();
+
+		Cursor c = null;
+		cacheDb.beginTransaction();
+		try {
+			c = cacheDb.rawQuery("select entry from timelines where roomId = ? and page = ? ;", new String[] { roomId, parameterMap.get("page") });
+			if (c.getCount() == 0) {
+				Log.i("CACHE", String.format("RoomTimeLine Cache(page:%s) Miss [%s]", parameterMap.get("page"), roomId));
+
+			} else {
+				Log.i("CACHE", String.format("RoomTimeLine Cache(page:%s) Hit  [%s]", parameterMap.get("page"), roomId));
+				if (c.moveToFirst()) {
+					do {
+						ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(c.getBlob(0)));
+						entryList.add((YouRoomEntry) ois.readObject());
+					} while (c.moveToNext());
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		} finally {
+			cacheDb.endTransaction();
+			if (c != null) {
+				c.close();
+			}
+		}
+
+		return entryList;
+	}
+
 	public YouRoomEntry getEntry(String roomId, String entryId, String updatedTime, boolean[] errFlg) {
 		YouRoomEntry entry = null;
 
@@ -462,22 +500,25 @@ public class YouRoomCommandProxy {
 			e.printStackTrace();
 			Log.w("NW", "Network Error occured");
 			errFlg[0] = true;
-			Cursor c1 = null;
-			try {
-				c1 = cacheDb.rawQuery("select entry from entries where entryId = ? and roomId = ? ;", new String[] { entryId, roomId, updatedTime });
-				if (c.getCount() == 1) {
-					c.moveToFirst();
-					ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(c.getBlob(0)));
-					entry = (YouRoomEntry) ois.readObject();
-				}
-			} catch (Exception e1) {
-				e1.printStackTrace();
-				throw new RuntimeException(e1);
-			} finally {
-				if (c1 != null) {
-					c1.close();
-				}
-			}
+			// Cursor c1 = null;
+			// try {
+			// c1 =
+			// cacheDb.rawQuery("select entry from entries where entryId = ? and roomId = ? ;",
+			// new String[] { entryId, roomId, updatedTime });
+			// if (c.getCount() == 1) {
+			// c.moveToFirst();
+			// ObjectInputStream ois = new ObjectInputStream(new
+			// ByteArrayInputStream(c.getBlob(0)));
+			// entry = (YouRoomEntry) ois.readObject();
+			// }
+			// } catch (Exception e1) {
+			// e1.printStackTrace();
+			// throw new RuntimeException(e1);
+			// } finally {
+			// if (c1 != null) {
+			// c1.close();
+			// }
+			// }
 		} finally {
 			cacheDb.endTransaction();
 			if (c != null) {

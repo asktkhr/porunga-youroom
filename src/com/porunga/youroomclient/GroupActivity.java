@@ -67,8 +67,8 @@ public class GroupActivity extends Activity {
 			ArrayList<YouRoomGroup> dataList = new ArrayList<YouRoomGroup>();
 			YouRoomCommandProxy proxy = new YouRoomCommandProxy(this);
 			dataList = proxy.getMyGroupListFromCache();
-			if (dataList.isEmpty())
-				progressDialog.show();
+//			if (dataList.isEmpty())
+//				progressDialog.show();
 
 			GetGroupTask task = new GetGroupTask(this);
 			task.execute();
